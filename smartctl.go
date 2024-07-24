@@ -213,6 +213,10 @@ func (smart *SMARTctl) mineInterfaceSpeed() {
 }
 
 func (smart *SMARTctl) mineDeviceAttribute() {
+	// Smartctl can sometimes return duplicate attributes which breaks prometheus reporting.
+	// A simple hack to avoid this issue is to drop the duplicated values ourselves.
+	dedup := make(map[string]bool)
+
 	for _, attribute := range smart.json.Get("ata_smart_attributes.table").Array() {
 		name := strings.TrimSpace(attribute.Get("name").String())
 		flagsShort := strings.TrimSpace(attribute.Get("flags.string").String())
@@ -225,6 +229,10 @@ func (smart *SMARTctl) mineDeviceAttribute() {
 			"auto_keep",
 		})
 		id := attribute.Get("id").String()
+		if dedup[id] {
+			continue
+		}
+		dedup[id] = true
 		for key, path := range map[string]string{
 			"value":  "value",
 			"worst":  "worst",
