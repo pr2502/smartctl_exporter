@@ -74,6 +74,13 @@ func NewSMARTctl(logger log.Logger, json gjson.Result, ch chan<- prometheus.Metr
 func (smart *SMARTctl) Collect() {
 	level.Debug(smart.logger).Log("msg", "Collecting metrics from", "device", smart.device.device, "family", smart.device.family, "model", smart.device.model)
 	smart.mineExitStatus()
+
+	exitCode := smart.json.Get("smartctl.exit_status").Int()
+	if (exitCode & (1 << 1)) != 0 {
+		// Device is in low-power mode, no other metrics can be collected
+		return
+	}
+
 	smart.mineDevice()
 	smart.mineCapacity()
 	smart.mineBlockSize()

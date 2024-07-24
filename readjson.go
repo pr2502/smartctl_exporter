@@ -121,8 +121,7 @@ func resultCodeIsOk(logger log.Logger, device string, SMARTCtlResult int64) bool
 			result = false
 		}
 		if (b & (1 << 1)) != 0 {
-			level.Error(logger).Log("msg", "Device open failed, device did not return an IDENTIFY DEVICE structure, or device is in a low-power mode", "device", device)
-			result = false
+			level.Warn(logger).Log("msg", "Device open failed, device did not return an IDENTIFY DEVICE structure, or device is in a low-power mode", "device", device)
 		}
 		if (b & (1 << 2)) != 0 {
 			level.Warn(logger).Log("msg", "Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure", "device", device)
